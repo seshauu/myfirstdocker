@@ -39,14 +39,17 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           # The commands to run on your EC2 server:
           script: |
-            # Pull the new image
+            # 1. Install the tool to fix the AppArmor bug
+            sudo apt-get install -y apparmor-utils || true
+            
+            # 2. Run the "Ghostbuster" command to unlock stuck containers
+            sudo aa-remove-unknown || true
+            
+            # 3. Pull the latest code
             sudo docker pull seshanjai417/myfirstdocker:latest
             
-            # Stop the container nicely first
-            sudo docker stop my-production-container || true
-            
-            # THEN remove it
+            # 4. NOW force remove the container (It should work now)
             sudo docker rm -f my-production-container || true
             
-            # Start the new one
+            # 5. Start the new one
             sudo docker run -d --name my-production-container -p 8080:80 seshanjai417/myfirstdocker:latest
