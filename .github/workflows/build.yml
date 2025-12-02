@@ -2,7 +2,7 @@ name: Build and Push to Docker Hub
 
 on:
   push:
-    branches: [ "main" ] # Runs whenever you push/change code
+    branches: [ "master" ] # Runs whenever you push/change code
 
 jobs:
   build:
