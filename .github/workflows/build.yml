@@ -39,7 +39,12 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           # The commands to run on your EC2 server:
           script: |
+            # 1. Pull the latest image
             sudo docker pull seshanjai417/myfirstdocker:latest
-            sudo docker stop my-production-container || true
-            sudo docker rm my-production-container || true
+            
+            # 2. FORCE remove the old container (Kill & Delete in one shot)
+            # The '|| true' means "If it doesn't exist, don't worry, just continue"
+            sudo docker rm -f my-production-container || true
+            
+            # 3. Start the new one
             sudo docker run -d --name my-production-container -p 8080:80 seshanjai417/myfirstdocker:latest
