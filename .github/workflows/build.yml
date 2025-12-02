@@ -1,13 +1,13 @@
-name: Build and Push to Docker Hub
+name: CI/CD Complete Pipeline
 
 on:
   push:
-    branches: [ "master" ] # Runs whenever you push/change code
+    branches: [ "master" ] # Or "main" - check your branch name!
 
 jobs:
+  # JOB 1: BUILD (The CI Part - You already did this)
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -23,5 +23,23 @@ jobs:
         with:
           context: .
           push: true
-          # This matches the image name you used manually
           tags: seshanjai417/myfirstdocker:latest
+
+  # JOB 2: DEPLOY (The CD Part - The New Stuff)
+  deploy:
+    needs: build  # Wait for Build to finish!
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master # A special tool to SSH into servers
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          # The commands to run on your EC2 server:
+          script: |
+            sudo docker pull seshanjai417/myfirstdocker:latest
+            sudo docker stop my-production-container || true
+            sudo docker rm my-production-container || true
+            sudo docker run -d --name my-production-container -p 8080:80 seshanjai417/myfirstdocker:latest
